@@ -1,0 +1,60 @@
+program = { ("\n"* ~ block)+ }
+
+statement = { matrix | expression }
+block     = { statement ~ ("\n" ~ statement)* }
+
+matrix     = { vector ~ (";" ~ "\n"* ~ vector)* }
+vector     = { expression ~ ("," ~ "\n"* ~ expression)+ }
+expression = { primary ~ (infix ~ primary)* }
+
+// groups
+group         = _{ parenthesized | bracketed | braced | barred }
+group_content = _{ "\n"? ~ statement? ~ "\n"? }
+parenthesized =  { "(" ~ group_content ~ ")" }
+bracketed     =  { "[" ~ group_content ~ "]" }
+braced        =  { "{" ~ group_content ~ "}" }
+barred        =  { "|" ~ group_content ~ "|" }
+
+// terminals
+primary  = _{ number | variable | group }
+number   = @{ integer ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ integer)? }
+integer  = @{ ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* | ASCII_DIGIT }
+variable = @{ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+
+// prefix operators
+prefix   = _{ positive | negative }
+positive =  { "+" }
+negative =  { "-" }
+
+// infix operators
+infix           = _{
+    add
+  | subtract
+  | multiply
+  | divide
+  | fraction
+  | pre_superscript
+  | over
+  | superscript
+  | pre_subscript
+  | under
+  | subscript
+}
+add             =  { "+" }
+subtract        =  { "-" }
+multiply        =  { "*" }
+divide          =  { "//" }
+fraction        =  { "/" }
+pre_superscript =  { "^^^" }
+over            =  { "^^" }
+superscript     =  { "^" }
+pre_subscript   =  { "___" }
+under           =  { "__" }
+subscript       =  { "_" }
+
+// postfix operators
+postfix   = _{ factorial }
+factorial =  { "!" }
+
+WHITESPACE = _{ " " | "\t" }
+
